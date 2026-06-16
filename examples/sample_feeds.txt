@@ -1,0 +1,11 @@
+# Публичные RSS-фиды для демо (по одной ссылке в строке, # — комментарий).
+# Это публичные URL новостных лент, не секреты. Тематика — travel / banking / AI.
+# Если какой-то фид недоступен — демо его пропускает и не падает.
+
+# Google News RSS — тематические запросы (публичный, без ключей)
+https://news.google.com/rss/search?q=AI+travel+bank&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=travel+banking+loyalty&hl=en-US&gl=US&ceid=US:en
+https://news.google.com/rss/search?q=fintech+travel&hl=en-US&gl=US&ceid=US:en
+
+# Skift — travel-индустрия (tier-1 travel trade)
+https://skift.com/feed/

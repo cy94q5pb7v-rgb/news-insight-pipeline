@@ -1,0 +1,9 @@
+# ── Ядро демо (лёгкие чистые wheels, без компиляции) ─────────────────────────
+feedparser>=6.0
+requests>=2.28
+
+# ── Опционально: извлечение полного текста статьи ────────────────────────────
+# Если установить — examples/run_pipeline.py будет тянуть полный текст статьи
+# через trafilatura. Если НЕ установить — мягко деградирует на RSS-summary.
+# optional (full-text extraction): trafilatura
+#   pip install trafilatura

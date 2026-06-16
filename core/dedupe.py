@@ -3,12 +3,27 @@
 Used by news archive accumulators to collapse the same story reported by
 different channels / with slight rewording.
 """
+import re
 from datetime import datetime, timedelta
 
-from core.config import (
-    _TITLE_WORD_RE, _TITLE_STOP,
-    NEAR_DUP_THRESHOLD, NEAR_DUP_WINDOW_DAYS,
-)
+try:
+    from core.config import (
+        _TITLE_WORD_RE, _TITLE_STOP,
+        NEAR_DUP_THRESHOLD, NEAR_DUP_WINDOW_DAYS,
+    )
+except ImportError:
+    # Standalone fallback so this module is importable in isolation (demo / reuse)
+    # without the full core.config. Values mirror core/config.py.
+    NEAR_DUP_THRESHOLD = 0.7
+    NEAR_DUP_WINDOW_DAYS = 5
+    _TITLE_WORD_RE = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+")
+    _TITLE_STOP = {
+        "в", "и", "на", "с", "по", "из", "за", "для", "о", "об", "к", "от", "до",
+        "при", "что", "это", "быть", "был", "была", "было", "или", "же", "только",
+        "уже", "ещё", "еще", "у", "не", "но", "а", "да", "бы", "ли", "через",
+        "также", "как", "со", "во", "the", "a", "an", "of", "and", "or", "to", "in",
+        "on", "for", "with", "by", "at", "from",
+    }
 
 
 def _title_tokens(t: str) -> set:
