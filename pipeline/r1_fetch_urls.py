@@ -160,6 +160,11 @@ TRAVEL_RE = re.compile(
     r"\bкруиз|\bcruise|cruises|"
     # Visa / passport
     r"\bвизы?\b|\bвиз[уыо]\w*|\bvisa\b|passport|паспорт|"
+    # Travel-in-banking markers (solution 4)
+    r"авиамил|тревел[-\s]?страхов|travel\s*insurance|страхован\w*\s+путешеств|"
+    r"тревел[-\s]?карт|travel\s*card|кобренд|co-?brand|"
+    r"кэшбэк\w*\s+(?:за\s+)?(?:поездк|путешеств|отел|авиа|перелёт)|travel\s*cashback|trip\s*cashback|"
+    r"(?:мили|баллы|бонус\w*)\s+за\s+(?:поездк|путешеств|перелёт|билет)|"
     # Rail travel (passenger only, not cargo)
     r"\bРЖД\s+(?:пасса|туристическ)|пасса[жш]ирск[аяиое]\s+поезд|"
     # OTA / aggregators / industry players
@@ -208,7 +213,7 @@ AI_RE = re.compile(
 )
 
 
-def _is_travel_topic(title: str) -> bool:
+def _is_travel_topic(title: str, snippet: str = "", query: str = "") -> bool:
     """Travel-relevance filter: requires at least one travel-related token.
 
     Достаточно одного TRAVEL_RE-слова в title. Pure travel news (Spirit Airlines
@@ -220,9 +225,17 @@ def _is_travel_topic(title: str) -> bool:
       "Travel в банкинге" / "AI travel" / "AI travel в банкинге"
     и пропускает items, которые не вписываются ни в одну.
     """
-    if not title:
-        return False
-    return bool(TRAVEL_RE.search(title))
+    # Recall-tuned topic gate (LLM stage does final precise selection):
+    #  - travel signal anywhere in title+snippet -> keep
+    #  - else, if found via a travel-scoped query AND has a banking/AI signal -> keep
+    blob = (title + " " + snippet).strip()
+    if not blob:
+        return True
+    if TRAVEL_RE.search(blob):
+        return True
+    if query and TRAVEL_RE.search(query) and (BANKING_RE.search(blob) or AI_RE.search(blob)):
+        return True
+    return False
 
 
 # URL-shape blacklist — отрезает landing-страницы, продуктовые карточки, промо,
@@ -1746,7 +1759,7 @@ def collect_stubs(mode: str = "all") -> tuple[list[dict], list[dict], dict]:
              "tier1_feeds": 0, "tier1_items": 0,
              "deduped": 0, "stubbed": 0}
 
-    def push(title: str, url: str, source: str, query: str, pub: str) -> bool:
+    def push(title: str, url: str, source: str, query: str, pub: str, snippet: str = "") -> bool:
         if not url:
             return False
         # URL-shape blacklist: drops landing/product/login pages регардless of source.
@@ -1758,7 +1771,7 @@ def collect_stubs(mode: str = "all") -> tuple[list[dict], list[dict], dict]:
         # Strict topic filter: travel + (banking OR AI). Without travel-сигнала — skip.
         # См. _is_travel_topic — отбрасываем «Spirit Airlines» (pure travel),
         # «Сбер прибыль» (pure banking), «GPT-5 release» (pure AI).
-        if title and not _is_travel_topic(title):
+        if not _is_travel_topic(title, snippet, query):
             stats["offtopic_dropped"] = stats.get("offtopic_dropped", 0) + 1
             return False
         n = _norm_url(url)
@@ -1808,12 +1821,13 @@ def collect_stubs(mode: str = "all") -> tuple[list[dict], list[dict], dict]:
                 pub = (it.findtext("pubDate") or "").strip()
                 src_node = it.find("source")
                 src = (src_node.text or "").strip() if src_node is not None else ""
+                desc = (it.findtext("description") or "").strip()
                 stats["google_news_items"] += 1
                 if not _is_fresh(pub):
                     stale += 1
                     stats["stale_dropped"] = stats.get("stale_dropped", 0) + 1
                     continue
-                if push(title, link, src, q, pub):
+                if push(title, link, src, q, pub, desc):
                     kept += 1
             print(f"GN [{q[:50]}]: total={len(items)} kept={kept} stale={stale}", file=sys.stderr)
         except Exception as e:
@@ -1851,10 +1865,17 @@ def collect_stubs(mode: str = "all") -> tuple[list[dict], list[dict], dict]:
                     link = (it.findtext("link") or "").strip()
                     pub = (it.findtext("pubDate") or "").strip()
                 stats["tier1_items"] += 1
+                try:
+                    if is_atom:
+                        desc = (it.findtext("{http://www.w3.org/2005/Atom}summary") or "").strip()
+                    else:
+                        desc = (it.findtext("description") or "").strip()
+                except Exception:
+                    desc = ""
                 if not _is_fresh(pub):
                     stats["stale_dropped"] = stats.get("stale_dropped", 0) + 1
                     continue
-                if push(title, link, label, f"feed:{label}", pub):
+                if push(title, link, label, f"feed:{label}", pub, desc):
                     kept += 1
             print(f"T1 [{label}]: total={len(items)} kept={kept}", file=sys.stderr)
         except Exception as e:
