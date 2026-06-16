@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Shared env for the news pipeline stages. Copy to trendwatch_env.sh and fill in.
+# NEVER commit real secret values — keep the filled file out of version control.
+
+# Yandex Disk (optional: only if you export results to Yandex Disk)
+export YANDEX_DISK_TOKEN="your-yandex-oauth-token-here"
+export YANDEX_DISK_PATH="disk:/trendwatch.xlsx"
+
+# Email summary (SMTP) — optional, only if you wire email delivery
+export TRENDWATCH_EMAIL_RECIPIENT="analyst@example.com"
+export TRENDWATCH_SMTP_HOST="smtp.example.com"
+export TRENDWATCH_SMTP_PORT="465"
+export TRENDWATCH_SMTP_USER="analyst@example.com"
+export TRENDWATCH_SMTP_PASSWORD="your-smtp-password-here"
+
+# Tavily Search API (free tier 1000/mo). Get key at https://app.tavily.com/
+export TAVILY_API_KEY="tvly-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

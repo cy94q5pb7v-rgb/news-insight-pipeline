@@ -1,0 +1,10 @@
+.env
+*.db
+*.sqlite*
+.tavily_keys
+.jwt_secret
+users.json
+__pycache__/
+*.pyc
+*.log
+*.bak*
