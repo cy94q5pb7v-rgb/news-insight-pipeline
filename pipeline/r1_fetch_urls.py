@@ -165,6 +165,17 @@ TRAVEL_RE = re.compile(
     r"тревел[-\s]?карт|travel\s*card|кобренд|co-?brand|"
     r"кэшбэк\w*\s+(?:за\s+)?(?:поездк|путешеств|отел|авиа|перелёт)|travel\s*cashback|trip\s*cashback|"
     r"(?:мили|баллы|бонус\w*)\s+за\s+(?:поездк|путешеств|перелёт|билет)|"
+    # Batch 2 — from drop-log review (real misses)
+    r"vacation\s*rental|турпоток|турпакет|турфирм|турры|туристическ\w*\s+рынок|"
+    r"пляжн\w*\s+отдых|курорт\w*|санатори\w*|"
+    r"полёт\w*|полет\w*|airfare|carry[-\s]?on|ручн\w*\s+клад|\bбагаж\w*|baggage|чемодан\w*|"
+    r"шенген\w*|schengen|загранпаспорт|загранич\w*|безвиз\w*|visa[-\s]?free|"
+    r"sapphire\s*reserve|chase\s*sapphire|capital\s*one\s*venture|amex\s*platinum|amex\s*gold|"
+    r"membership\s*rewards|bilt\s*reward|travel\s*rewards|"
+    r"чартерн\w*|charter\s*flight|car\s*rental|rent[-\s]?a[-\s]?car|прокат\s+авто|аэроэкспресс|aeroexpress|"
+    r"командировк\w*|business\s*travel|bleisure|"
+    r"all[-\s]?inclusive|всё\s+включено|олинклюзив|duty[-\s]?free|дьюти[-\s]?фри|"
+    r"touris\w*|trip\.com|agoda|makemytrip|cleartrip|kiwi\.com|level\.travel|travelata|kupibilet|biletix|"
     # Rail travel (passenger only, not cargo)
     r"\bРЖД\s+(?:пасса|туристическ)|пасса[жш]ирск[аяиое]\s+поезд|"
     # OTA / aggregators / industry players
